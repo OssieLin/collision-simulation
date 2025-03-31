@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1D Ball Collision Simulation</title>
+    <style>
+        body {
+            text-align: center; 
+            font-family: "Courier New", Courier, monospace;
+        }
+        canvas { 
+            background: white; 
+            display: block; 
+            margin: auto; 
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h2>1D Ball Collision Simulation</h2>
+    <label>Mass 1: <input type="number" id="mass1" value="1"></label>
+    <label>Velocity 1: <input type="number" id="vel1" value="2"></label>
+    <br>
+    <label>Mass 2: <input type="number" id="mass2" value="1"></label>
+    <label>Velocity 2: <input type="number" id="vel2" value="-1"></label>
+    <br>
+    <button onclick="startSimulation()">Start</button>
+    <canvas id="canvas" width="600" height="200"></canvas>
+    
+    <script>
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let ball1, ball2;
+
+        function startSimulation() {
+            let m1 = parseFloat(document.getElementById("mass1").value);
+            let v1 = parseFloat(document.getElementById("vel1").value);
+            let m2 = parseFloat(document.getElementById("mass2").value);
+            let v2 = parseFloat(document.getElementById("vel2").value);
+            
+            ball1 = { x: 200, radius: 20, mass: m1, velocity: v1 };
+            ball2 = { x: 400, radius: 20, mass: m2, velocity: v2 };
+            requestAnimationFrame(update);
+        }
+        
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Move balls
+            ball1.x += ball1.velocity;
+            ball2.x += ball2.velocity;
+            
+            // Wall collisions
+            if (ball1.x - ball1.radius <= 0 || ball1.x + ball1.radius >= canvas.width) {
+                ball1.velocity *= -1;
+            }
+            if (ball2.x - ball2.radius <= 0 || ball2.x + ball2.radius >= canvas.width) {
+                ball2.velocity *= -1;
+            }
+            
+            // Check collision
+            let d = Math.abs(ball1.x - ball2.x);
+            if (d <= ball1.radius + ball2.radius && (ball2.velocity - ball1.velocity) < 0) {
+                let v1 = ((ball1.mass - ball2.mass) / (ball1.mass + ball2.mass)) * ball1.velocity + (2 * ball2.mass / (ball1.mass + ball2.mass)) * ball2.velocity;
+                let v2 = ((ball2.mass - ball1.mass) / (ball1.mass + ball2.mass)) * ball2.velocity + (2 * ball1.mass / (ball1.mass + ball2.mass)) * ball1.velocity;
+                ball1.velocity = v1;
+                ball2.velocity = v2;
+            }
+            
+            // Draw balls
+            ctx.beginPath();
+            ctx.arc(ball1.x, canvas.height / 2, ball1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "blue";
+            ctx.fill();
+            ctx.closePath();
+            
+            ctx.beginPath();
+            ctx.arc(ball2.x, canvas.height / 2, ball2.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.closePath();
+            
+            requestAnimationFrame(update);
+        }
+    </script>
+</body>
+</html>
